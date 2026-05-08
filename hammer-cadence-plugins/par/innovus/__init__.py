@@ -631,8 +631,9 @@ class Innovus(HammerPlaceAndRouteTool, CadenceTool):
         -expanded_views creates timing reports for each MMMC view.
         """
         self.verbose_append("check_antenna")
-        self.verbose_append("opt_design -post_route")
+        # self.verbose_append("opt_design -post_route")
         self.verbose_append("opt_design -post_route -setup -hold -expanded_views")
+        self.verbose_append("opt_design -post_route -hold -expanded_views")
         if self.hierarchical_mode.is_nonleaf_hierarchical():
             self.verbose_append("unflatten_ilm")
         return True

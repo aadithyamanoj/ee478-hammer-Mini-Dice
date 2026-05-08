@@ -1,6 +1,6 @@
 # Input config file common to all modules
 
-vlsi.core.max_threads: 8
+vlsi.core.max_threads: 16
 vlsi.core.build_system: make # Generate Make include to aid in flow 
 
 # Tools and Technology setup

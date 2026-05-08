@@ -10,6 +10,7 @@ from typing import Dict, Callable, Optional, List
 # Import custom Hammer 'hooks'
 import py.bsg_essential_hammer_hooks as essential_hooks
 import py.lab_hammer_hooks as lab_hooks
+import py.Mini_Dice_hammer_hooks as Mini_Dice_hooks
 
 class ProjectHammerDriver(CLIDriver):
     def get_extra_sram_generator_hooks(self) -> List[HammerToolHookAction]:
@@ -46,6 +47,7 @@ class ProjectHammerDriver(CLIDriver):
             # SYNTAX: make_pre_insertion_hook("EXISTING_STEP", INSERTED_HOOK) Examples:
             hammer_vlsi.HammerTool.make_pre_insertion_hook("write_design",  essential_hooks.innovus_overwrite_write_sdf_funct),
             hammer_vlsi.HammerTool.make_pre_insertion_hook("write_design",  essential_hooks.innovus_extra_reports),
+            hammer_vlsi.HammerTool.make_pre_insertion_hook("opt_design", Mini_Dice_hooks.innovus_set_hold_target_slack),
 
             # make_post_insertion_hook will execute the custom hook after the specified step. Examples:
             # hammer_vlsi.HammerTool.make_post_insertion_hook("init_design", example_tool_settings),

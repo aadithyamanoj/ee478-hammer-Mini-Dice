@@ -66,6 +66,30 @@ def genus_syn_with_preserve(x: hammer_vlsi.HammerTool) -> bool:
             x.set_setting('synthesis.syn_map', False) # Don't map in this case
         else: # A sub-module is preserved
             x.verbose_append(f'set_db module:{x.top_module}/{mod} .preserve true')
+
+    # try: preserve_hinsts = x.get_setting('synthesis.inputs.preserve_hinsts')
+    # except: preserve_hinsts = []
+    # for hinst in preserve_hinsts:
+    #     hinst_path = hinst if hinst.startswith(f'{x.top_module}/') else f'{x.top_module}/{hinst}'
+    #     x.append(f'if {{[catch {{set_db hinst:{hinst_path} .ungroup_ok false}} ungroup_err]}} {{')
+    #     x.append(f'  puts {{Warning: could not set ungroup_ok for {hinst_path}:}}')
+    #     x.append('  puts $ungroup_err')
+    #     x.append('}')
+
+    # try: preserve_cgra_experiment = bool(x.get_setting('synthesis.inputs.preserve_cgra_experiment'))
+    # except: preserve_cgra_experiment = False
+    # if preserve_cgra_experiment:
+    #     # Experiment-only knobs from Genus GLO-* messages.  These keep the CGRA
+    #     # from being collapsed while we debug whether the chip IO observes it.
+    #     x.verbose_append("set_db root: .merge_combinational_hier_instances false")
+    #     x.verbose_append("set_db root: .optimize_merge_flops false")
+    #     x.verbose_append("set_db root: .optimize_merge_latches false")
+    #     x.verbose_append("set_db root: .optimize_constant_0_flops false")
+    #     x.verbose_append("set_db root: .optimize_constant_1_flops false")
+    #     x.verbose_append("set_db root: .optimize_constant_feedback_seqs false")
+
+    # x.verbose_append("set_db root: .delete_unloaded_insts false")
+    # x.verbose_append("set_db root: .information_level 2")
     x.verbose_append('syn_generic')
     return True
 

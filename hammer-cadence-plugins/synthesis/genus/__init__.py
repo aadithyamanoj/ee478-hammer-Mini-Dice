@@ -245,6 +245,24 @@ class Genus(HammerSynthesisTool, CadenceTool):
         # Separate VHDL and Verilog/SystemVerilog files.
         vhdl_files = [f for f in abspath_input_files if f.endswith((".vhd", ".vhdl"))]
         verilog_sv_files = [f for f in abspath_input_files if f.endswith((".v", ".sv", ".vh", ".vi", ".svh"))]
+        # Genus does not automatically consume Hammer's HDL include/search path settings
+        # when read_hdl is emitted directly, so set the search path explicitly here.
+        hdl_search_paths = []  # type: List[str]
+        for key in ["synthesis.inputs.hdl_search_paths", "synthesis.inputs.include_dirs"]:
+            try:
+                value = self.get_setting(key)
+            except Exception:
+                value = []
+            if isinstance(value, list):
+                hdl_search_paths.extend(value)
+
+        if len(hdl_search_paths) > 0:
+            normalized_paths = []  # type: List[str]
+            for path in hdl_search_paths:
+                abs_path = os.path.join(os.getcwd(), path) if not os.path.isabs(path) else path
+                if abs_path not in normalized_paths:
+                    normalized_paths.append(abs_path)
+            verbose_append("set_db init_hdl_search_path {{ {} }}".format(" ".join(normalized_paths)))
 
         # Read the RTL.
         if vhdl_files:
