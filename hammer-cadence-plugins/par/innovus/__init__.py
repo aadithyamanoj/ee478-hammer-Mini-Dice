@@ -259,6 +259,9 @@ class Innovus(HammerPlaceAndRouteTool, CadenceTool):
         """Initialize the design."""
         verbose_append = self.verbose_append
 
+        verbose_append("set_db opt_multi_bit_flop_opt true")
+        verbose_append("set_db opt_multi_bit_flop_merge_timing_effort high")
+
         # Perform common path pessimism removal in setup and hold mode
         verbose_append("set_db timing_analysis_cppr both")
         # Use OCV mode for timing analysis by default
@@ -632,7 +635,7 @@ class Innovus(HammerPlaceAndRouteTool, CadenceTool):
         """
         self.verbose_append("check_antenna")
         # self.verbose_append("opt_design -post_route")
-        self.verbose_append("opt_design -post_route -setup -hold -expanded_views")
+        self.verbose_append("opt_design -post_route -setup -expanded_views")
         self.verbose_append("opt_design -post_route -hold -expanded_views")
         self.verbose_append("opt_design -post_route -hold -expanded_views")
         if self.hierarchical_mode.is_nonleaf_hierarchical():
