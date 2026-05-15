@@ -188,6 +188,106 @@ def genus_dft_post_map(x: hammer_vlsi.HammerTool) -> bool:
         x.verbose_append(
             f'catch {{ set_db [get_db hinsts {full}] .dft_dont_scan true }}')
 
+
+# explicetly exclude config mem for bitstream
+    x.append (
+        f"""
+        set base "u_mini_dice_top/u_dice_core/u_dice_backend/u_dice_cgra_rf/cgra_subs_inst/bitstream_buf_serial_inst/bank_data_r_reg"
+
+        array unset wanted_scan_exclude
+        array set wanted_scan_exclude {{}}
+
+        for {{set i 0}} {{$i <= 1}} {{incr i}} {{
+            for {{set j 0}} {{$j <= 1073}} {{incr j}} {{
+                set flop_name "${{base}}\\[$i\\]\\[$j\\]"
+                set wanted_scan_exclude($flop_name) 1
+            }}
+        }}
+
+        set selected_flops {{}}
+
+        foreach f [get_db insts -if {{.is_flop == 1}}] {{
+            set fname [get_db $f .name]
+
+            if {{[info exists wanted_scan_exclude($fname)]}} {{
+                lappend selected_flops $f
+            }}
+        }}
+
+        puts "excluding [llength $selected_flops] flops from scan"
+
+        foreach f $selected_flops {{
+            puts "SCAN_EXCLUDE: [get_db $f .name]"
+        }}
+
+        foreach f $selected_flops {{
+            if {{[catch {{set_db $f .dft_dont_scan true}} err]}} {{
+                puts "ERROR: failed to set dft_dont_scan on [get_db $f .name]: $err"
+            }}
+        }}
+
+        foreach f $selected_flops {{
+            puts "AFTER: [get_db $f .name] dft_dont_scan=[get_db $f .dft_dont_scan]"
+        }}  
+    """)
+
+# silly way to remove flop data from scanchain :) should keep enq_r, deq_r and all ctrl data that are in flops (only dice core for now)
+    x.append (
+        f"""
+
+        set selected_flops {{}}
+        foreach f [get_db insts -if {{.is_flop == 1}}] {{
+            set fname [get_db $f .name]
+
+            if {{[regexp {{^u_mini_dice_top/u_dice_core/}} $fname] && [regexp {{/mem_1r1w/synth/nz\\.mem_reg\\[[0-9]+\\]\\[[0-9]+\\]$}} $fname]}} {{
+                lappend selected_flops $f
+            }}
+        }}
+
+        puts "excluding [llength $selected_flops] FIFO data flops"
+
+        foreach f $selected_flops {{
+            if {{[catch {{set_db $f .dft_dont_scan true}} err]}} {{
+                puts "ERROR: failed to set dft_dont_scan on [get_db $f .name]: $err"
+            }}
+        }}
+
+        """
+    )
+    # try:
+    #     dont_scan_flop = x.get_setting('dft.dont_scan_instance_flop') or []
+    # except KeyError:
+    #     dont_scan_flop = []
+    # for insts in dont_scan_flop:
+    #     full = f'{insts}'
+    #     x.append(
+    #     f"""
+    #     set prefix "{full}"
+    #     set selected_flops {{}}
+
+    #     puts "SCAN_EXCLUDE_PREFIX: $prefix"
+
+    #     foreach f [get_db insts -if {{.is_flop == 1}}] {{
+    #         set fname [get_db $f .name]
+
+    #         if {{[string first $prefix $fname] == 0}} {{
+    #             lappend selected_flops $f
+    #         }}
+    #     }}
+
+    #     puts "excluding [llength $selected_flops] flops from scan matching prefix: $prefix"
+
+    #     foreach f $selected_flops {{
+    #         puts "SCAN_EXCLUDE: [get_db $f .name]"
+    #     }}
+
+    #     foreach f $selected_flops {{
+    #         if {{[catch {{set_db $f .dft_dont_scan true}} err]}} {{
+    #             puts "ERROR: failed to set dft_dont_scan on [get_db $f .name]: $err"
+    #         }}
+    #     }}
+    #     """)
+    
     x.verbose_append('check_dft_rules')
     x.verbose_append(f'fix_dft_violations -clock -async_set -async_reset -test_control se -scan_clock_pin {clk}')
     x.verbose_append('check_dft_rules -advanced')
