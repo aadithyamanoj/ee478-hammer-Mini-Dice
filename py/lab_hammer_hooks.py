@@ -232,6 +232,7 @@ def genus_dft_post_map(x: hammer_vlsi.HammerTool) -> bool:
     """)
 
 # silly way to remove flop data from scanchain :) should keep enq_r, deq_r and all ctrl data that are in flops (only dice core for now)
+# [regexp {{^u_mini_dice_top/u_dice_core/}} $fname] && 
     x.append (
         f"""
 
@@ -239,7 +240,15 @@ def genus_dft_post_map(x: hammer_vlsi.HammerTool) -> bool:
         foreach f [get_db insts -if {{.is_flop == 1}}] {{
             set fname [get_db $f .name]
 
-            if {{[regexp {{^u_mini_dice_top/u_dice_core/}} $fname] && [regexp {{/mem_1r1w/synth/nz\\.mem_reg\\[[0-9]+\\]\\[[0-9]+\\]$}} $fname]}} {{
+            if {{[regexp {{/mem_1r1w/synth/nz\\.mem_reg\\[([0-9]+)\\]\\[[0-9]+\\]$}} $fname -> row] && $row != 0}} {{
+                lappend selected_flops $f
+            }}
+
+            if {{[regexp {{/gen_ready_fifos\\[0\\]\\.ready_fifo/mem_reg\\[([0-9]+)\\]\\[[0-9]+\\]$}} $fname -> row] && $row != 0}} {{
+                lappend selected_flops $f
+            }}
+
+            if {{[regexp {{/gen_fifos\\[0\\]\\.fifo_inst/mem_reg\\[([0-9]+)\\]\\[[0-9]+\\]$}} $fname -> row] && $row != 0}} {{
                 lappend selected_flops $f
             }}
         }}

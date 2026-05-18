@@ -34,7 +34,7 @@ class ProjectHammerDriver(CLIDriver):
             hammer_vlsi.HammerTool.make_post_insertion_hook('syn_map',         lab_hooks.genus_dft_post_map),
             # Replacement hooks rename the steps; keep these last
             hammer_vlsi.HammerTool.make_replacement_hook('syn_generic', essential_hooks.genus_syn_with_preserve),
-            hammer_vlsi.HammerTool.make_replacement_hook('syn_map',     essential_hooks.genus_maybe_syn_map),
+            # hammer_vlsi.HammerTool.make_replacement_hook('syn_map',     essential_hooks.genus_maybe_syn_map),
         ]
         return extra_hooks
 
